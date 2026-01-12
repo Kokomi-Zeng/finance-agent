@@ -415,11 +415,7 @@ ai-agent/
 
 ### 2. 如何获取 Search API Key？
 
-本项目使用 Brave Search API 进行网络搜索。获取步骤：
-1. 访问 [Brave Search API](https://brave.com/search/api/)
-2. 注册账号并登录
-3. 在控制台创建 API Key
-4. 免费版提供每月 2000 次搜索额度
+访问 [Search API](https://www.searchapi.io/)，创建 API Key。
 
 ### 3. 为什么向量数据库连接失败？
 
@@ -459,34 +455,3 @@ location /api/ {
 ```bash
 rm -rf agent-memory/<chatId>.json
 ```
-
----
-
-## 相关文档
-
-- [Spring AI 官方文档](https://docs.spring.io/spring-ai/reference/)
-- [阿里云 DashScope 文档](https://help.aliyun.com/zh/dashscope/)
-- [PgVector 文档](https://github.com/pgvector/pgvector)
-- [Vue 3 官方文档](https://vuejs.org/)
-
----
-
-## 风险提示
-
-**投资有风险，入市需谨慎。** 本平台提供的所有建议仅供参考，不构成投资建议。用户应根据自身情况做出独立判断，本平台不对任何投资损失承担责任。
-
----
-
-## 作者
-
-- GitHub: [@Kokomi-Zeng](https://github.com/Kokomi-Zeng)
-
----
-
-<div align="center">
-
-**如果这个项目对你有帮助，请给个 Star！**
-
-Made with by Kokomi-Zeng
-
-</div>
