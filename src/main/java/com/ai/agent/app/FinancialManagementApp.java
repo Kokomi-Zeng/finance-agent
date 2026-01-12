@@ -131,8 +131,9 @@ public class FinancialManagementApp {
 
     // RAG 和 MCP 资源（用于智能体整合）
 
-    @Resource
-    private VectorStore appVectorStore;
+    // RAG 功能已禁用
+    // @Resource
+    // private VectorStore appVectorStore;
 
     @Resource
     private ToolCallbackProvider toolCallbackProvider;
@@ -216,16 +217,22 @@ public class FinancialManagementApp {
                 对于复杂任务，可以分解问题并逐步使用不同工具解决。
                 每次使用工具后，评估是否已有足够信息回答用户问题。
 
-                【步数管理】你最多只有6步，当前需要合理规划：
-                - 第1-2步：收集信息
-                - 第3-4步：处理和生成内容
-                - 第5步：整理结果
-                - 第6步：必须返回最终结果
+                【严格步数限制】你最多只有6步，必须严格遵守以下规划：
+                - 第1-3步：收集核心信息（不要过度探索）
+                - 第4步：处理和生成内容（如生成报告）
+                - 第5步：【最后机会】检查是否完成，如果完成必须调用 terminate，如果未完成则快速总结已有信息
+                - 第6步：【强制结束】系统会强制结束，必须在第5步就调用 terminate
+
+                【关键原则 - 避免超时】
+                1. 简单任务（问答、咨询）：第1-2步就应该调用 terminate
+                2. 中等任务（搜索+分析）：不超过3步，第4步必须 terminate
+                3. 复杂任务（生成报告）：第4步生成，第5步必须 terminate
+                4. 【禁止】在第6步才调用 terminate - 必须在第5步或之前完成
 
                 【必须遵守】
                 1. 如果信息足够，立即提供完整答案并使用 terminate 工具
                 2. 如果生成了文件，最终结果必须包含下载链接
-                3. 如果已用5步仍未完成，必须在下一步总结并返回部分结果
+                3. 【关键】第4步后必须评估：如果接近完成，下一步必须 terminate
                 4. 使用 terminate 工具时，reason 参数必须包含：
                    - 任务完成情况总结
                    - 生成的文件链接（如有）
@@ -236,11 +243,12 @@ public class FinancialManagementApp {
         agent.setNextStepPrompt(nextStepPrompt);
         agent.setMaxSteps(6);
 
-        // 初始化 AI 对话客户端，整合 RAG 知识库
+        // 初始化 AI 对话客户端（已禁用 RAG 功能）
         ChatClient agentChatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(
-                        new LoggerAdvisor(),
-                        new QuestionAnswerAdvisor(appVectorStore)
+                        new LoggerAdvisor()
+                        // RAG 功能已禁用
+                        // new QuestionAnswerAdvisor(appVectorStore)
                 )
                 .build();
         agent.setChatClient(agentChatClient);

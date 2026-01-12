@@ -129,6 +129,21 @@ public abstract class BaseAgent {
                     int stepNumber = i + 1;
                     currentStep = stepNumber;
                     log.info("Executing step {}/{}", stepNumber, maxSteps);
+
+                    // 【关键优化】在倒数第二步时，给 AI 注入警告消息
+                    if (stepNumber == maxSteps - 1 && state != AgentState.FINISHED) {
+                        String warningMessage = String.format(
+                            "【重要警告】你现在在第 %d 步，只剩下 1 步了！下一步（第 %d 步）必须是最后一步。" +
+                            "如果你还没有完成任务，请立即：\n" +
+                            "1. 停止继续收集信息\n" +
+                            "2. 基于已有信息总结结果\n" +
+                            "3. 在下一步使用 terminate 工具返回最终答案\n" +
+                            "如果已经完成任务，请立即使用 terminate 工具。",
+                            stepNumber, maxSteps);
+                        messageList.add(new UserMessage(warningMessage));
+                        log.warn("注入步数警告: {}", warningMessage);
+                    }
+
                     // 单步执行
                     String stepResult = step();
                     String result = "Step " + stepNumber + ": " + stepResult;
