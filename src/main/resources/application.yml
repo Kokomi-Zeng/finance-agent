@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: ai-financial-agent
+  profiles:
+    active: local  # 本地开发使用 application-local.yml，生产环境使用 prod
+  # 本地开发连接远程 PgVector 数据库（敏感信息请在 application-local.yml 中配置）
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/postgres?currentSchema=public}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+  ai:
+    dashscope:
+      # 请在 application-local.yml 或环境变量中配置真实的 API Key
+      api-key: ${DASHSCOPE_API_KEY:your-dashscope-api-key-here}
+      chat:
+        options:
+          model: qwen-plus
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: gemma3:1b
+# 临时注释掉 MCP 服务（Brave Search 连接不稳定）
+#    mcp:
+#      client:
+#        stdio:
+#          servers-configuration: classpath:mcp-servers.json
+    # 本地开发也使用远程 PgVector
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1536
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+# springdoc-openapi config
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.ai.agent.controller
+# knife4j config
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+# searchAPI
+search-api:
+  # 请在 application-local.yml 或环境变量中配置真实的 API Key
+  api-key: ${SEARCH_API_KEY:your-search-api-key-here}
+# 修改日志级别，查看 Spring AI 更多调用细节
+logging:
+  level:
+    org.springframework.ai: DEBUG
+    org.springframework.jdbc: DEBUG
+    org.springframework.boot.autoconfigure.jdbc: DEBUG
+    com.zaxxer.hikari: DEBUG

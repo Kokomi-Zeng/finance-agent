@@ -1,0 +1,21 @@
+# 简化版 Dockerfile - 使用服务器已安装的 Maven 构建
+FROM eclipse-temurin:21-jre-jammy
+
+WORKDIR /app
+
+# 创建必要的目录
+RUN mkdir -p /app/agent-memory /app/document /app/downloads
+
+# 复制预构建的 JAR 文件（由 deploy.sh 在服务器上使用 Maven 构建）
+COPY target/*.jar app.jar
+
+# 复制文档目录（如果有）
+COPY src/main/resources/document /app/document
+
+# 暴露端口
+EXPOSE 8123
+
+# 设置 JVM 参数和启动命令
+ENV JAVA_OPTS="-Xms512m -Xmx2048m -XX:+UseG1GC"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

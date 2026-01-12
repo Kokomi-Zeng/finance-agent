@@ -1,0 +1,15 @@
+# 本地开发配置文件示例
+# 复制此文件为 application-local.yml 并填入真实密钥
+
+spring:
+  datasource:
+    url: jdbc:postgresql://your-host:15432/postgres?currentSchema=public
+    username: postgres
+    password: your-database-password
+
+  ai:
+    dashscope:
+      api-key: your-dashscope-api-key-here
+
+search-api:
+  api-key: your-search-api-key-here

@@ -1,0 +1,40 @@
+# 生产环境配置（会覆盖 application.yml 配置）
+# 注意：敏感信息（API Key、密码）建议通过环境变量注入
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/postgres}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  ai:
+    dashscope:
+      # 通过环境变量注入 API Key（更安全）
+      api-key: ${DASHSCOPE_API_KEY:your-dashscope-api-key-here}
+      chat:
+        options:
+          model: qwen-plus
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1536
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000
+
+# searchAPI
+search-api:
+  api-key: ${SEARCH_API_KEY:your-search-api-key-here}
+
+# 生产环境降低日志级别
+logging:
+  level:
+    root: INFO
+    org.springframework.ai: INFO
+    com.ai.agent: INFO
