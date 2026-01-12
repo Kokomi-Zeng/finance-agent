@@ -9,6 +9,8 @@
 [![Vue](https://img.shields.io/badge/Vue-3.2.47-green.svg)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+![example3](./example3.svg)
+
 </div>
 
 ---
@@ -31,8 +33,6 @@
 ## 在线体验
 
 想直接体验？Please contact the author: 2845728164@qq.com to get the demo website link.
-
-![example3](./example3.svg)
 
 ---
 
