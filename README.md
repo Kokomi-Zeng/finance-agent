@@ -1,6 +1,6 @@
-# FinAgent4J - 基于 Java 的金融智能 Agent 系统
-
 <div align="center">
+
+# FinAgent4J - 基于 Java 的金融智能 Agent 系统
 
 一个基于 Spring AI 和 Vue 3 的智能理财管理应用，提供专业的投资建议、市场分析和理财咨询服务。
 
@@ -32,7 +32,7 @@
 
 想直接体验？Please contact the author: 2845728164@qq.com to get the demo website link.
 
-![example3](C:\Users\Lingyue\Downloads\example3.svg)
+![example3](./example3.svg)
 
 ---
 
