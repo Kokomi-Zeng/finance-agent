@@ -6,7 +6,6 @@ tmpclaude-*
 .claude/
 agent-memory/
 .DS_Store
-*.svg
 
 HELP.md
 target/
