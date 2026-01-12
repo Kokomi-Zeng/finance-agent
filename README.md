@@ -7,7 +7,6 @@
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Vue](https://img.shields.io/badge/Vue-3.2.47-green.svg)](https://vuejs.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ![example3](./example3.svg)
 
@@ -104,7 +103,6 @@
 ### 部署技术
 
 - **Docker** - 容器化部署
-- **Docker Compose** - 服务编排
 - **Nginx** - Web 服务器 + 反向代理
 
 ---
@@ -130,9 +128,8 @@
 1. **FinancialManagementApp** - 理财应用主类，管理智能体生命周期
 2. **ToolCallAgent** - 工具调用智能体，实现 ReAct 循环
 3. **FileBasedChatMemory** - 基于文件的对话记忆存储
-4. **VectorStoreConfig** - 向量数据库配置，支持增量加载
+4. **VectorStoreConfig** - 向量数据库配置
 5. **KeywordEnricher** - 关键词增强器，为文档添加元数据，提高检索准确度
-6. **AiController** - RESTful API 控制器
 
 ---
 
@@ -251,8 +248,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/Kokomi-Zeng/ai-agent.git
-cd ai-agent
+git clone https://github.com/Kokomi-Zeng/finance-agent
+cd finance-agent
 
 # 2. 修正脚本行尾符（Linux/Mac）
 sed -i 's/\r$//' deploy.sh
@@ -542,25 +539,6 @@ localStorage.setItem('financial-agent-messages', JSON.stringify(messages));
 - pgvector 扩展是否安装（`CREATE EXTENSION IF NOT EXISTS vector;`）
 - 数据库连接配置是否正确
 
-### 2.5. 为什么会报 "Range of input length should be [1, 2048]" 错误？
-
-**原因**：DashScope Embedding API 限制输入长度为 1-2048 tokens。当工具（如 `scrapeWebPage`）返回超长内容（如完整 HTML）时，QuestionAnswerAdvisor 尝试对整个上下文做 embedding 查询，导致超过限制。
-
-**解决方案（已实现）**：
-1. **WebScrapingTool 改进**：现在只提取纯文本（最多 2000 字符），不再返回完整 HTML
-2. **ContextCompressionAdvisor**：在 RAG 查询前自动压缩过长的工具响应和消息
-3. **压缩策略**：
-   - 截断工具响应（每个最多 1000 字符）
-   - 截断助手消息文本（最多 500 字符）
-   - 过滤失败的响应和重复消息
-   - 保留最近 10 条消息
-
-**手动修复**：如果仍然遇到问题，可以调整 `ContextCompressionAdvisor` 中的长度限制：
-```java
-private static final int MAX_TOOL_RESPONSE_LENGTH = 1000;  // 调小这个值
-private static final int MAX_TOTAL_CONTEXT_LENGTH = 4000;   // 或调小这个值
-```
-
 ### 3. Docker 部署时端口冲突怎么办？
 
 编辑 `docker-compose.yml`，修改端口映射：
@@ -619,12 +597,6 @@ spring:
 ## 风险提示
 
 **投资有风险，入市需谨慎。** 本平台提供的所有建议仅供参考，不构成投资建议。用户应根据自身情况做出独立判断，本平台不对任何投资损失承担责任。
-
----
-
-## License
-
-本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
 
 ---
 
