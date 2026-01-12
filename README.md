@@ -47,7 +47,6 @@
 ### RAG 知识库
 
 - **向量数据库**：支持 PgVector（PostgreSQL + pgvector 扩展）
-- **增量加载**：自动检测已存在的文档，避免重复添加（节省 API 费用）
 - **智能检索**：基于语义相似度的文档检索
 - **文档管理**：支持 Markdown 格式的知识库文档
 - **关键词增强**：使用 `KeywordEnricher` 为文档添加关键词元数据，提高检索准确度
@@ -244,7 +243,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ## Docker 部署
 
-### 一键部署
+### 一键部署 
 
 ```bash
 # 1. 克隆项目
@@ -353,13 +352,6 @@ data:{"type":"result_chunk","content":"你好"}
 data:{"type":"result_end"}
 ```
 
-### API 文档访问
-
-启动后端后，访问 Knife4j 文档：
-
-- **Swagger UI**：http://localhost:8123/api/swagger-ui.html
-- **Knife4j UI**：http://localhost:8123/api/doc.html
-
 ---
 
 ## 项目结构
@@ -416,116 +408,6 @@ ai-agent/
 
 ---
 
-## 核心功能详解
-
-### 1. 对话记忆持久化
-
-使用 `FileBasedChatMemory` 将对话记忆保存到文件系统：
-
-```java
-// 保存位置：./agent-memory/<chatId>.json
-FileBasedChatMemory chatMemory = new FileBasedChatMemory(
-    "agent-memory",
-    chatId
-);
-```
-
-**特点**：
-- 重启后不丢失历史对话
-- 每个会话独立存储
-- 自动创建目录
-
-### 2. 对话记忆压缩
-
-智能过滤和压缩对话记忆，减少上下文长度：
-
-- 过滤 `nextStepPrompt` 重复消息
-- 过滤 `doTerminate` 工具调用和响应
-- 截断工具参数（>200 字符）
-- 截断工具响应（>500 字符）
-- 过滤失败的工具响应（如百度安全验证）
-
-**效果**：预期减少 70-80% 的上下文长度，节省 API 费用。
-
-### 3. 向量数据库增量加载
-
-`VectorStoreConfig` 自动检测已存在的文档，避免重复添加：
-
-```java
-// 查询数据库中已存在的文件名
-List<String> existingFilenames = jdbcTemplate.queryForList(
-    "SELECT DISTINCT metadata->>'filename' FROM vector_store WHERE metadata->>'filename' IS NOT NULL",
-    String.class
-);
-
-// 过滤出新文档
-List<Document> documentsToLoad = documentList.stream()
-    .filter(doc -> !existingFilenames.contains(doc.getMetadata().get("filename")))
-    .toList();
-```
-
-**优点**：
-- 避免重复计算 Embedding，节省 API 费用
-- 支持增量更新，新增文档自动加载
-- 加快应用启动速度
-
-### 4. 关键词增强器
-
-`KeywordEnricher` 在文档加载时提取关键词并添加到元数据中：
-
-```java
-// KeywordEnricher 自动为文档添加关键词元数据
-// 提高向量检索的准确度和相关性
-Document enrichedDoc = keywordEnricher.enrich(document);
-```
-
-**作用**：
-- 提取文档关键词
-- 添加到文档元数据
-- 提高检索准确度
-- 支持混合检索（向量 + 关键词）
-
-### 5. 文件下载工具优化
-
-`ResourceDownloadTool` 添加 Content-Type 预检查，防止下载 HTML 页面：
-
-```java
-// 1. 预检查 Content-Type
-HEAD 请求获取 Content-Type
-
-// 2. 拦截 HTML 页面
-if (contentType.contains("text/html")) {
-    return "错误：URL 指向的是 HTML 页面，不是文件";
-}
-
-// 3. 下载后二次验证
-if (fileContent.contains("<!DOCTYPE html>")) {
-    // 删除错误下载的文件
-    Files.deleteIfExists(filePath);
-    return "错误：下载的内容是 HTML 页面";
-}
-```
-
-### 6. 会话管理
-
-前端使用 `localStorage` 存储会话列表：
-
-```javascript
-// 存储会话列表
-localStorage.setItem('financial-agent-conversations', JSON.stringify(conversations));
-
-// 存储会话消息
-localStorage.setItem('financial-agent-messages', JSON.stringify(messages));
-```
-
-**功能**：
-- 创建新对话
-- 查看历史对话
-- 切换会话
-- 自动使用第一条消息作为标题
-
----
-
 ## 常见问题
 
 ### 1. 如何获取 DashScope API Key？
@@ -569,18 +451,6 @@ location /api/ {
 
 ```bash
 rm -rf agent-memory/<chatId>.json
-```
-
-### 6. 本地开发如何连接远程数据库？
-
-编辑 `application-local.yml`：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://远程IP:15432/postgres?currentSchema=public
-    username: postgres
-    password: 密码
 ```
 
 ---
