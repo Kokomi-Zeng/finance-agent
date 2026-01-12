@@ -24,7 +24,6 @@
 - [Docker 部署](#docker-部署)
 - [API 文档](#api-文档)
 - [项目结构](#项目结构)
-- [核心功能详解](#核心功能详解)
 - [常见问题](#常见问题)
 
 ---
@@ -414,14 +413,22 @@ ai-agent/
 
 访问 [阿里云 DashScope 控制台](https://dashscope.console.aliyun.com/)，创建 API Key。
 
-### 2. 为什么向量数据库连接失败？
+### 2. 如何获取 Search API Key？
+
+本项目使用 Brave Search API 进行网络搜索。获取步骤：
+1. 访问 [Brave Search API](https://brave.com/search/api/)
+2. 注册账号并登录
+3. 在控制台创建 API Key
+4. 免费版提供每月 2000 次搜索额度
+
+### 3. 为什么向量数据库连接失败？
 
 检查：
 - PostgreSQL 是否启动
 - pgvector 扩展是否安装（`CREATE EXTENSION IF NOT EXISTS vector;`）
 - 数据库连接配置是否正确
 
-### 3. Docker 部署时端口冲突怎么办？
+### 4. Docker 部署时端口冲突怎么办？
 
 编辑 `docker-compose.yml`，修改端口映射：
 
@@ -432,7 +439,7 @@ services:
       - "8124:8123"  # 修改为其他端口
 ```
 
-### 4. 前端请求后端 301 重定向？
+### 5. 前端请求后端 301 重定向？
 
 检查 `nginx.conf` 是否包含以下配置：
 
@@ -445,7 +452,7 @@ location /api/ {
 }
 ```
 
-### 5. 如何清除对话记忆？
+### 6. 如何清除对话记忆？
 
 删除 `agent-memory/` 目录下的对应文件：
 
