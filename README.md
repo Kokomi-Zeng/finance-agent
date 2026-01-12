@@ -16,6 +16,12 @@ RAG / ReAct Agent / SSE 流式对话 / Tool Calling / PgVector / 多轮记忆 / 
 
 ---
 
+## 在线体验
+
+想直接体验？Please contact the author: 2845728164@qq.com to get the demo website link.
+
+---
+
 ## 目录
 
 - [功能特性](#功能特性)
@@ -27,12 +33,6 @@ RAG / ReAct Agent / SSE 流式对话 / Tool Calling / PgVector / 多轮记忆 / 
 - [API 文档](#api-文档)
 - [项目结构](#项目结构)
 - [常见问题](#常见问题)
-
----
-
-## 在线体验
-
-想直接体验？Please contact the author: 2845728164@qq.com to get the demo website link.
 
 ---
 
