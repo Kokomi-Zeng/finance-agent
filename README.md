@@ -3,6 +3,7 @@
 # FinAgent4J - 基于 Java Spring AI的金融智能 Agent 系统
 
 一个基于 Spring AI 和 Vue 3 的智能理财管理应用，提供专业的投资建议、市场分析和理财咨询服务。
+
 RAG / ReAct Agent / SSE 流式对话 / Tool Calling / PgVector / 多轮记忆 / Spring AI
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
