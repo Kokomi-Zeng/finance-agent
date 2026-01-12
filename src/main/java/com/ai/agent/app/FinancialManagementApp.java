@@ -243,12 +243,11 @@ public class FinancialManagementApp {
         agent.setNextStepPrompt(nextStepPrompt);
         agent.setMaxSteps(6);
 
-        // 初始化 AI 对话客户端（已禁用 RAG 功能）
+        // 初始化 AI 对话客户端
         ChatClient agentChatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(
-                        new LoggerAdvisor()
-                        // RAG 功能已禁用
-                        // new QuestionAnswerAdvisor(appVectorStore)
+                        new LoggerAdvisor(),
+                        new QuestionAnswerAdvisor(appVectorStore)
                 )
                 .build();
         agent.setChatClient(agentChatClient);
