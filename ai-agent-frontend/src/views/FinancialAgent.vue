@@ -3,12 +3,14 @@
     <!-- 左侧历史栏 -->
     <div class="sidebar-left" :class="{ collapsed: sidebarCollapsed }">
       <div class="sidebar-header">
+        <!-- 菜单按钮 - 既能展开也能收起 -->
+        <button class="menu-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '打开菜单' : '关闭菜单'">
+          <span>☰</span>
+        </button>
+        <!-- 新对话按钮（sidebar打开时显示） -->
         <button v-if="!sidebarCollapsed" class="new-chat-btn" @click="startNewConversation">
           <span class="btn-icon">+</span>
           <span class="btn-text">新对话</span>
-        </button>
-        <button class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开' : '收起'">
-          <span>{{ sidebarCollapsed ? '»' : '«' }}</span>
         </button>
       </div>
       <div v-if="!sidebarCollapsed" class="history-list">
@@ -31,7 +33,15 @@
     <!-- 右侧主内容区 -->
     <div class="main-content">
       <div class="header">
-        <div class="back-button" @click="goBack">返回</div>
+        <!-- 手机端菜单按钮（sidebar collapsed时显示） -->
+        <button v-if="sidebarCollapsed" class="header-menu-btn" @click="toggleSidebar" title="打开菜单">
+          <span>☰</span>
+        </button>
+        <!-- 返回按钮（sidebar展开或电脑端时显示） -->
+        <div v-else class="back-button" @click="handleBackOrToggle">
+          <span class="back-icon">←</span>
+          <span class="back-text">返回</span>
+        </div>
         <h1 class="title">AI理财智能体</h1>
         <div class="header-spacer"></div>
       </div>
@@ -316,6 +326,18 @@ const goBack = () => {
   router.push('/')
 }
 
+// 返回按钮的处理：在移动端，如果sidebar已打开则关闭它；否则返回主页
+const handleBackOrToggle = () => {
+  const isMobileView = window.innerWidth <= 768
+  if (isMobileView && !sidebarCollapsed.value) {
+    // 移动端且sidebar已打开：关闭sidebar
+    sidebarCollapsed.value = true
+  } else {
+    // 电脑端或移动端且sidebar已关闭：返回主页
+    goBack()
+  }
+}
+
 // 页面加载时初始化
 onMounted(() => {
   // 加载会话历史
@@ -372,6 +394,8 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   transition: width 0.3s ease, margin-left 0.3s ease;
   overflow: hidden;
+  position: relative;
+  z-index: 1000;
 }
 
 .sidebar-left.collapsed {
@@ -386,16 +410,46 @@ onBeforeUnmount(() => {
   flex-direction: row;
   gap: 8px;
   flex-shrink: 0;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
 }
 
 .sidebar-left.collapsed .sidebar-header {
   justify-content: center;
-  padding: 12px 6px;
+  padding: 0;
+}
+
+.menu-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-btn:hover {
+  background: rgba(203, 166, 89, 0.1);
+  color: #cba659;
+}
+
+.sidebar-left.collapsed .menu-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
 }
 
 .new-chat-btn {
-  flex: 4;
+  flex: 1;
   padding: 10px 16px;
   border: 1px solid rgba(203, 166, 89, 0.5);
   background: linear-gradient(135deg, rgba(65, 90, 119, 0.3), rgba(27, 38, 59, 0.3));
@@ -423,31 +477,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 0 10px rgba(203, 166, 89, 0.3);
 }
 
-.collapse-btn {
-  flex: 1;
-  padding: 6px;
-  border: 1px solid rgba(203, 166, 89, 0.3);
-  background: transparent;
-  color: #94a3b8;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-left.collapsed .collapse-btn {
-  flex: none;
-  width: 100%;
-}
-
-.collapse-btn:hover {
-  background: rgba(203, 166, 89, 0.1);
-  border-color: #cba659;
-  color: #cba659;
-}
 
 .history-list {
   flex: 1;
@@ -513,16 +542,34 @@ onBeforeUnmount(() => {
 
 .header {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: 0 24px;
   background: linear-gradient(135deg, #1b263b 0%, #0d1b2a 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  border-bottom: 1px solid rgba(203, 166, 89, 0.3);
+  z-index: 50;
   height: 60px;
   flex-shrink: 0;
+}
+
+
+.header-menu-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 8px 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  justify-self: start;
+}
+
+.header-menu-btn:hover {
+  color: #cba659;
 }
 
 .back-button {
@@ -533,15 +580,19 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
   justify-self: start;
   color: #94a3b8;
+  gap: 8px;
 }
 
 .back-button:hover {
   color: #cba659;
 }
 
-.back-button:before {
-  content: '←';
-  margin-right: 8px;
+.back-icon {
+  display: inline;
+}
+
+.back-text {
+  display: inline;
 }
 
 .title {
@@ -551,6 +602,7 @@ onBeforeUnmount(() => {
   text-align: center;
   justify-self: center;
   color: #cba659;
+  grid-column: 2;
 }
 
 .header-spacer {
@@ -598,13 +650,14 @@ onBeforeUnmount(() => {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .sidebar-left {
-    position: absolute;
+    position: fixed;
     left: 0;
-    top: 0;
-    z-index: 100;
+    top: 60px;
+    z-index: 1000;
     width: 240px;
+    height: calc(100vh - 60px);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
@@ -612,6 +665,11 @@ onBeforeUnmount(() => {
   .sidebar-left:not(.collapsed) {
     transform: translateX(0);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 手机端显示菜单按钮 */
+  .header-menu-btn {
+    display: flex;
   }
 
   .header {
@@ -626,6 +684,15 @@ onBeforeUnmount(() => {
 
   .back-button {
     font-size: 14px;
+    gap: 4px;
+  }
+
+  .back-text {
+    display: none;
+  }
+
+  .back-icon {
+    display: inline;
   }
 
   .title {
