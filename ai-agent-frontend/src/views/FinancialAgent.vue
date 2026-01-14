@@ -1,21 +1,17 @@
 <template>
   <div class="financial-agent-container">
-    <div class="header">
-      <div class="back-button" @click="goBack">返回</div>
-      <h1 class="title">AI理财智能体</h1>
-      <div class="header-actions">
-        <button class="new-chat-btn" @click="startNewConversation">+ 新对话</button>
-        <button class="history-btn" @click="toggleHistory">历史</button>
+    <!-- 左侧历史栏 -->
+    <div class="sidebar-left" :class="{ collapsed: sidebarCollapsed }">
+      <div class="sidebar-header">
+        <button v-if="!sidebarCollapsed" class="new-chat-btn" @click="startNewConversation">
+          <span class="btn-icon">+</span>
+          <span class="btn-text">新对话</span>
+        </button>
+        <button class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开' : '收起'">
+          <span>{{ sidebarCollapsed ? '»' : '«' }}</span>
+        </button>
       </div>
-    </div>
-
-    <!-- 会话历史侧边栏 -->
-    <div class="history-sidebar" :class="{ open: showHistory }">
-      <div class="history-header">
-        <h3>对话历史</h3>
-        <button class="close-btn" @click="toggleHistory">×</button>
-      </div>
-      <div class="history-list">
+      <div v-if="!sidebarCollapsed" class="history-list">
         <div
           v-for="conv in conversations"
           :key="conv.id"
@@ -32,19 +28,28 @@
       </div>
     </div>
 
-    <div class="content-wrapper">
-      <div class="chat-area">
-        <ChatRoom
-          :messages="messages"
-          :connection-status="connectionStatus"
-          ai-type="agent"
-          @send-message="sendMessage"
-        />
+    <!-- 右侧主内容区 -->
+    <div class="main-content">
+      <div class="header">
+        <div class="back-button" @click="goBack">返回</div>
+        <h1 class="title">AI理财智能体</h1>
+        <div class="header-spacer"></div>
       </div>
-    </div>
 
-    <div class="footer-container">
-      <AppFooter />
+      <div class="content-wrapper">
+        <div class="chat-area">
+          <ChatRoom
+            :messages="messages"
+            :connection-status="connectionStatus"
+            ai-type="agent"
+            @send-message="sendMessage"
+          />
+        </div>
+      </div>
+
+      <div class="footer-container">
+        <AppFooter />
+      </div>
     </div>
   </div>
 </template>
@@ -78,7 +83,7 @@ const connectionStatus = ref('disconnected')
 let eventSource = null
 
 // 会话管理
-const showHistory = ref(false)
+const sidebarCollapsed = ref(false)
 const conversations = ref([])
 const chatId = ref('')
 
@@ -165,12 +170,11 @@ const switchConversation = (id) => {
     messages.value = []
     addWelcomeMessage()
   }
-  showHistory.value = false
 }
 
-// 切换历史侧边栏
-const toggleHistory = () => {
-  showHistory.value = !showHistory.value
+// 切换侧边栏折叠状态
+const toggleSidebar = () => {
+  sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
 // 格式化时间
@@ -348,13 +352,163 @@ onBeforeUnmount(() => {
 <style scoped>
 .financial-agent-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   width: 100%;
   background-color: #0d1b2a;
   overflow: hidden;
   margin: 0;
   padding: 0;
+}
+
+/* 左侧历史栏 */
+.sidebar-left {
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(135deg, #1b263b 0%, #0d1b2a 100%);
+  border-right: 1px solid rgba(203, 166, 89, 0.3);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s ease, margin-left 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar-left.collapsed {
+  width: 50px;
+}
+
+.sidebar-header {
+  padding: 12px;
+  border-bottom: 1px solid rgba(203, 166, 89, 0.2);
+  background: rgba(203, 166, 89, 0.05);
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: stretch;
+}
+
+.sidebar-left.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 12px 6px;
+}
+
+.new-chat-btn {
+  flex: 4;
+  padding: 10px 16px;
+  border: 1px solid rgba(203, 166, 89, 0.5);
+  background: linear-gradient(135deg, rgba(65, 90, 119, 0.3), rgba(27, 38, 59, 0.3));
+  color: #cba659;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.new-chat-btn:hover {
+  background: linear-gradient(135deg, rgba(65, 90, 119, 0.5), rgba(27, 38, 59, 0.5));
+  border-color: #cba659;
+  box-shadow: 0 0 10px rgba(203, 166, 89, 0.3);
+}
+
+.collapse-btn {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid rgba(203, 166, 89, 0.3);
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-left.collapsed .collapse-btn {
+  flex: none;
+  width: 100%;
+}
+
+.collapse-btn:hover {
+  background: rgba(203, 166, 89, 0.1);
+  border-color: #cba659;
+  color: #cba659;
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+.history-list::-webkit-scrollbar {
+  display: none;
+}
+
+.history-item {
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.history-item:hover {
+  background: rgba(203, 166, 89, 0.1);
+  border-color: rgba(203, 166, 89, 0.2);
+}
+
+.history-item.active {
+  background: rgba(203, 166, 89, 0.15);
+  border: 1px solid rgba(203, 166, 89, 0.4);
+}
+
+.conv-title {
+  font-size: 14px;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conv-time {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.no-history {
+  text-align: center;
+  color: #64748b;
+  padding: 20px;
+  font-size: 14px;
+}
+
+/* 右侧主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0d1b2a;
 }
 
 .header {
@@ -399,123 +553,8 @@ onBeforeUnmount(() => {
   color: #cba659;
 }
 
-.header-actions {
-  display: flex;
-  gap: 8px;
+.header-spacer {
   justify-self: end;
-}
-
-.new-chat-btn,
-.history-btn {
-  padding: 6px 12px;
-  border: 1px solid rgba(203, 166, 89, 0.5);
-  background: transparent;
-  color: #cba659;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.new-chat-btn:hover,
-.history-btn:hover {
-  background: rgba(203, 166, 89, 0.2);
-  border-color: #cba659;
-}
-
-/* 历史侧边栏 */
-.history-sidebar {
-  position: fixed;
-  top: 0;
-  right: -300px;
-  width: 300px;
-  height: 100vh;
-  background: linear-gradient(135deg, #1b263b 0%, #0d1b2a 100%);
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 200;
-  transition: right 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid rgba(203, 166, 89, 0.3);
-}
-
-.history-sidebar.open {
-  right: 0;
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid rgba(203, 166, 89, 0.2);
-  background: rgba(203, 166, 89, 0.1);
-}
-
-.history-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: #cba659;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #cba659;
-}
-
-.history-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.history-item {
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 4px;
-  transition: background 0.2s;
-  border: 1px solid transparent;
-}
-
-.history-item:hover {
-  background: rgba(203, 166, 89, 0.1);
-}
-
-.history-item.active {
-  background: rgba(203, 166, 89, 0.15);
-  border: 1px solid rgba(203, 166, 89, 0.3);
-}
-
-.conv-title {
-  font-size: 14px;
-  color: #e2e8f0;
-  margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.conv-time {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.no-history {
-  text-align: center;
-  color: #64748b;
-  padding: 20px;
-  font-size: 14px;
 }
 
 .content-wrapper {
@@ -541,6 +580,15 @@ onBeforeUnmount(() => {
 
 /* 响应式样式 */
 @media (max-width: 768px) {
+  .sidebar-left {
+    width: 200px;
+  }
+
+  .sidebar-left.collapsed {
+    width: 0;
+    margin-left: -1px;
+  }
+
   .header {
     padding: 0 16px;
   }
@@ -548,28 +596,32 @@ onBeforeUnmount(() => {
   .title {
     font-size: 18px;
   }
-
-  .history-sidebar {
-    width: 280px;
-    right: -280px;
-  }
-
-  .header-actions {
-    gap: 4px;
-  }
-
-  .new-chat-btn,
-  .history-btn {
-    padding: 5px 8px;
-    font-size: 11px;
-  }
 }
 
 @media (max-width: 480px) {
+  .sidebar-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-left:not(.collapsed) {
+    transform: translateX(0);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  }
+
   .header {
     padding: 0 12px;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     gap: 8px;
+  }
+
+  .header-spacer {
+    display: none;
   }
 
   .back-button {
@@ -578,17 +630,8 @@ onBeforeUnmount(() => {
 
   .title {
     font-size: 14px;
-  }
-
-  .history-sidebar {
-    width: 260px;
-    right: -260px;
-  }
-
-  .new-chat-btn,
-  .history-btn {
-    padding: 4px 6px;
-    font-size: 10px;
+    text-align: left;
+    justify-self: start;
   }
 }
 </style>

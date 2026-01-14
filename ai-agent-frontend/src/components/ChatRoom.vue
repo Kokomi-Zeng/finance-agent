@@ -192,6 +192,8 @@ onMounted(() => {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
 }
 
 .message-wrapper {
@@ -444,6 +446,10 @@ onMounted(() => {
 }
 
 /* 隐藏Webkit浏览器的滚动条 */
+.chat-messages::-webkit-scrollbar {
+  display: none;
+}
+
 .input-box::-webkit-scrollbar {
   display: none;
 }
