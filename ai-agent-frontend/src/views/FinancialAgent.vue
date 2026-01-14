@@ -19,8 +19,34 @@
           :class="{ active: conv.id === chatId }"
           @click="switchConversation(conv.id)"
         >
-          <div class="conv-title">{{ conv.title }}</div>
-          <div class="conv-time">{{ formatTime(conv.createdAt) }}</div>
+          <div class="conv-content">
+            <template v-if="editingConvId === conv.id">
+              <input
+                v-model="editingTitle"
+                class="edit-title-input"
+                @click.stop
+                @keydown.enter="saveConvTitle(conv.id)"
+                @keydown.escape="cancelEdit"
+                ref="editInput"
+              />
+            </template>
+            <template v-else>
+              <div class="conv-title">{{ conv.title }}</div>
+              <div class="conv-time">{{ formatTime(conv.createdAt) }}</div>
+            </template>
+          </div>
+          <div v-if="editingConvId !== conv.id" class="action-btns">
+            <button
+              class="edit-btn"
+              @click.stop="startEdit(conv)"
+              title="重命名"
+            >✎</button>
+            <button
+              class="delete-btn"
+              @click.stop="deleteConversation(conv.id)"
+              title="删除"
+            >✕</button>
+          </div>
         </div>
         <div v-if="conversations.length === 0" class="no-history">
           暂无对话历史
@@ -61,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@vueuse/head'
 import ChatRoom from '../components/ChatRoom.vue'
@@ -89,6 +115,9 @@ let eventSource = null
 const sidebarCollapsed = ref(false)
 const conversations = ref([])
 const chatId = ref('')
+const editingConvId = ref(null)
+const editingTitle = ref('')
+const editInput = ref(null)
 
 const STORAGE_KEY = 'financial-agent-conversations'
 const MESSAGES_KEY = 'financial-agent-messages'
@@ -170,6 +199,64 @@ const switchConversation = (id) => {
 
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
+const startEdit = async (conv) => {
+  editingConvId.value = conv.id
+  editingTitle.value = conv.title
+  await nextTick()
+  if (editInput.value) {
+    editInput.value.focus()
+    editInput.value.select()
+  }
+}
+
+const saveConvTitle = (id) => {
+  if (editingTitle.value.trim()) {
+    const conv = conversations.value.find(c => c.id === id)
+    if (conv) {
+      conv.title = editingTitle.value.trim()
+      saveConversations()
+    }
+  }
+  editingConvId.value = null
+  editingTitle.value = ''
+}
+
+const cancelEdit = () => {
+  editingConvId.value = null
+  editingTitle.value = ''
+}
+
+const handleGlobalClick = (e) => {
+  if (editingConvId.value && !e.target.closest('.edit-title-input')) {
+    saveConvTitle(editingConvId.value)
+  }
+}
+
+const deleteConversation = (id) => {
+  const index = conversations.value.findIndex(c => c.id === id)
+  if (index === -1) return
+
+  // 删除对话
+  conversations.value.splice(index, 1)
+  saveConversations()
+
+  // 删除对应的消息
+  const allMessages = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '{}')
+  delete allMessages[id]
+  localStorage.setItem(MESSAGES_KEY, JSON.stringify(allMessages))
+
+  // 如果删除的是当前对话，切换到其他对话
+  if (chatId.value === id) {
+    if (conversations.value.length > 0) {
+      switchConversation(conversations.value[0].id)
+    } else {
+      chatId.value = createNewConversation()
+      messages.value = []
+      addWelcomeMessage()
+    }
+  }
 }
 
 const formatTime = (timestamp) => {
@@ -308,6 +395,8 @@ onMounted(() => {
     chatId.value = createNewConversation()
     addWelcomeMessage()
   }
+
+  document.addEventListener('click', handleGlobalClick)
 })
 
 onBeforeUnmount(() => {
@@ -317,6 +406,7 @@ onBeforeUnmount(() => {
   if (chatId.value && messages.value.length > 0) {
     saveMessages(chatId.value, messages.value)
   }
+  document.removeEventListener('click', handleGlobalClick)
 })
 </script>
 
@@ -336,12 +426,7 @@ onBeforeUnmount(() => {
 .sidebar-left {
   width: 260px;
   height: 100vh;
-  background: linear-gradient(180deg,
-    rgba(15, 25, 45, 0.98) 0%,
-    rgba(10, 22, 40, 0.98) 100%
-  );
-  backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  background: #0d1c30;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -363,7 +448,6 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   align-items: center;
   min-height: 68px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .sidebar-left.collapsed .sidebar-header {
@@ -454,10 +538,72 @@ onBeforeUnmount(() => {
   margin-bottom: 4px;
   transition: all 0.2s;
   background: transparent;
+  position: relative;
 }
 
 .history-item:hover {
   background: rgba(255, 255, 255, 0.03);
+}
+
+.history-item:hover .action-btns {
+  opacity: 1;
+}
+
+.conv-content {
+  text-align: center;
+}
+
+.action-btns {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.edit-btn,
+.delete-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.edit-btn:hover {
+  background: rgba(203, 166, 89, 0.15);
+  color: rgba(203, 166, 89, 0.9);
+}
+
+.delete-btn:hover {
+  background: rgba(255, 100, 100, 0.15);
+  color: rgba(255, 100, 100, 0.9);
+}
+
+.edit-title-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid rgba(203, 166, 89, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  outline: none;
+}
+
+.edit-title-input:focus {
+  border-color: rgba(203, 166, 89, 0.5);
 }
 
 .history-item.active {
@@ -497,9 +643,9 @@ onBeforeUnmount(() => {
   height: 100vh;
   overflow: hidden;
   background: linear-gradient(180deg,
-    #0a1628 0%,
-    #0d1a2d 50%,
-    #0a1628 100%
+    #0f1f35 0%,
+    #132640 50%,
+    #0f1f35 100%
   );
 }
 
@@ -508,12 +654,10 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 24px;
-  background: rgba(10, 22, 40, 0.6);
-  backdrop-filter: blur(20px);
+  background: #0d1c30;
   z-index: 50;
   height: 60px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .back-button {

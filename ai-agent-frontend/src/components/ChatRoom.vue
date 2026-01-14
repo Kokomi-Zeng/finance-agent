@@ -70,7 +70,9 @@
           @click="sendMessage"
           class="send-button"
           :disabled="connectionStatus === 'connecting' || !inputMessage.trim()"
-        >发送</button>
+        >
+          <span class="send-icon">↑</span>
+        </button>
       </div>
     </div>
   </div>
@@ -188,6 +190,7 @@ onMounted(() => {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  padding-bottom: 100px;
   display: flex;
   flex-direction: column;
   scrollbar-width: none;
@@ -399,40 +402,47 @@ onMounted(() => {
 }
 
 .chat-input-container {
-  flex-shrink: 0;
-  background: rgba(10, 22, 40, 0.8);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
   z-index: 100;
   padding: 16px 24px;
 }
 
 .chat-input {
   display: flex;
-  gap: 12px;
   align-items: center;
   max-width: 900px;
   margin: 0 auto;
+  background: rgba(15, 25, 45, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 6px 6px 6px 20px;
+  position: relative;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .input-box {
   flex: 1;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 10px 16px;
+  border: none;
+  padding: 0;
+  padding-right: 12px;
   font-size: 14px;
   resize: none;
-  height: 42px;
-  min-height: 42px;
+  height: 36px;
+  min-height: 36px;
   max-height: 120px;
   outline: none;
   transition: all 0.2s;
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   color: rgba(255, 255, 255, 0.9);
-  line-height: 22px;
+  line-height: 36px;
   box-sizing: border-box;
 }
 
@@ -445,31 +455,42 @@ onMounted(() => {
 }
 
 .input-box:focus {
+  outline: none;
+}
+
+.chat-input:focus-within {
   border-color: rgba(203, 166, 89, 0.3);
-  background: rgba(255, 255, 255, 0.04);
 }
 
 .send-button {
-  background: linear-gradient(135deg,
-    rgba(203, 166, 89, 0.2) 0%,
-    rgba(203, 166, 89, 0.1) 100%
-  );
-  color: rgba(203, 166, 89, 0.9);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(203, 166, 89, 0.9);
+  color: #0a1628;
   border: none;
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: 500;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.send-icon {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .send-button:hover:not(:disabled) {
-  background: linear-gradient(135deg,
-    rgba(203, 166, 89, 0.3) 0%,
-    rgba(203, 166, 89, 0.15) 100%
-  );
+  background: rgba(203, 166, 89, 1);
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
 }
 
 .typing-indicator {
@@ -484,7 +505,7 @@ onMounted(() => {
   50% { opacity: 1; }
 }
 
-.input-box:disabled, .send-button:disabled {
+.input-box:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -501,6 +522,7 @@ onMounted(() => {
 
   .chat-messages {
     padding: 20px 16px;
+    padding-bottom: 90px;
   }
 }
 
@@ -519,11 +541,17 @@ onMounted(() => {
   }
 
   .send-button {
-    padding: 10px 16px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .send-icon {
+    font-size: 16px;
   }
 
   .chat-messages {
     padding: 16px 12px;
+    padding-bottom: 85px;
   }
 }
 
