@@ -13,7 +13,7 @@
       </div>
       <div v-if="!sidebarCollapsed" class="history-list">
         <div class="new-chat-item" @click="startNewConversation">
-          <span class="new-chat-text">+ 新对话</span>
+          <span class="new-chat-text">✎ 创建新对话</span>
         </div>
         <div
           v-for="conv in conversations"
@@ -70,6 +70,7 @@
         <button class="mobile-menu-btn" @click="toggleSidebar">
           <span>☰</span>
         </button>
+        <div class="mobile-title">AI理财智能体</div>
         <div class="back-button" @click="goBack">返回</div>
       </div>
 
@@ -81,6 +82,7 @@
             ai-type="agent"
             placeholder="向AI理财智能体提问..."
             @send-message="sendMessage"
+            @stop-generation="stopGeneration"
           />
         </div>
       </div>
@@ -208,9 +210,10 @@ const startEdit = async (conv) => {
   editingConvId.value = conv.id
   editingTitle.value = conv.title
   await nextTick()
-  if (editInput.value) {
-    editInput.value.focus()
-    editInput.value.select()
+  const input = Array.isArray(editInput.value) ? editInput.value[0] : editInput.value
+  if (input) {
+    input.focus()
+    input.select()
   }
 }
 
@@ -376,6 +379,27 @@ const sendMessage = (message) => {
   }
 }
 
+const stopGeneration = () => {
+  if (eventSource) {
+    eventSource.close()
+    eventSource = null
+  }
+  connectionStatus.value = 'disconnected'
+
+  // 更新最后一条消息的状态
+  const lastMessage = messages.value[messages.value.length - 1]
+  if (lastMessage && !lastMessage.isUser) {
+    if (lastMessage.type === 'thinking' && lastMessage.isThinking) {
+      lastMessage.isThinking = false
+      lastMessage.content = `⏹ 已停止 (${lastMessage.thinkingSteps?.length || 0} 步)`
+    } else if (lastMessage.type === 'ai-result' && !lastMessage.content) {
+      lastMessage.content = '(已停止生成)'
+    }
+  }
+
+  saveMessages(chatId.value, messages.value)
+}
+
 const goBack = () => {
   router.push('/')
 }
@@ -520,12 +544,12 @@ onBeforeUnmount(() => {
   cursor: pointer;
   margin-bottom: 8px;
   transition: all 0.2s;
-  background: rgba(203, 166, 89, 0.08);
+  background: #132640;
   text-align: center;
 }
 
 .new-chat-item:hover {
-  background: rgba(203, 166, 89, 0.15);
+  background: #182d4a;
 }
 
 .new-chat-text {
@@ -596,17 +620,17 @@ onBeforeUnmount(() => {
 
 .edit-title-input {
   width: 100%;
-  padding: 6px 10px;
-  border: 1px solid rgba(203, 166, 89, 0.3);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.9);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
   outline: none;
-}
-
-.edit-title-input:focus {
-  border-color: rgba(203, 166, 89, 0.5);
+  margin-bottom: 4px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .history-item.active {
@@ -686,6 +710,10 @@ onBeforeUnmount(() => {
 .back-button:hover {
   background: rgba(203, 166, 89, 0.1);
   border-color: rgba(203, 166, 89, 0.3);
+}
+
+.mobile-title {
+  display: none;
 }
 
 .title {
@@ -796,6 +824,24 @@ onBeforeUnmount(() => {
 
   .header {
     padding: 0 16px;
+    background: #0d1c30;
+    position: relative;
+    justify-content: center;
+  }
+
+  .mobile-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.5px;
+  }
+
+  .back-button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .title {

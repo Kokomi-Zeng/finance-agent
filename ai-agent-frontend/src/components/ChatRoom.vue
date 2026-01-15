@@ -38,7 +38,9 @@
             <!-- 普通消息 -->
             <div v-else class="message-content" v-html="formatContent(msg.content)">
             </div>
-            <span v-if="connectionStatus === 'connecting' && index === messages.length - 1" class="typing-indicator">▋</span>
+            <span v-if="connectionStatus === 'connecting' && index === messages.length - 1 && (msg.type === 'thinking' || !msg.content)" class="typing-indicator">
+              <span class="breathing-dot"></span>
+            </span>
             <div class="message-time">{{ formatTime(msg.time) }}</div>
           </div>
         </div>
@@ -61,15 +63,20 @@
       <div class="chat-input">
         <textarea
           v-model="inputMessage"
-          @keydown.enter.prevent="sendMessage"
+          @keydown.enter.prevent="handleEnter"
           :placeholder="placeholder"
           class="input-box"
-          :disabled="connectionStatus === 'connecting'"
         ></textarea>
         <button
+          v-if="connectionStatus === 'connecting'"
+          @click="stopGeneration"
+          class="stop-button"
+        ></button>
+        <button
+          v-else
           @click="sendMessage"
           class="send-button"
-          :disabled="connectionStatus === 'connecting' || !inputMessage.trim()"
+          :disabled="!inputMessage.trim()"
         >
           <span class="send-icon">↑</span>
         </button>
@@ -108,7 +115,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['send-message'])
+const emit = defineEmits(['send-message', 'stop-generation'])
 
 const inputMessage = ref('')
 const messagesContainer = ref(null)
@@ -126,6 +133,17 @@ const sendMessage = () => {
 
   emit('send-message', inputMessage.value)
   inputMessage.value = ''
+}
+
+// 停止生成
+const stopGeneration = () => {
+  emit('stop-generation')
+}
+
+// 处理回车键
+const handleEnter = () => {
+  if (props.connectionStatus === 'connecting') return
+  sendMessage()
 }
 
 // 格式化时间
@@ -422,10 +440,10 @@ onMounted(() => {
   margin: 0 auto;
   background: rgba(15, 25, 45, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 6px 6px 6px 20px;
+  border-radius: 32px;
+  padding: 10px 10px 10px 24px;
   position: relative;
-  min-height: 48px;
+  min-height: 64px;
   box-sizing: border-box;
 }
 
@@ -433,11 +451,11 @@ onMounted(() => {
   flex: 1;
   border: none;
   padding: 0;
-  padding-right: 12px;
-  font-size: 14px;
+  padding-right: 16px;
+  font-size: 16px;
   resize: none;
-  height: 36px;
-  min-height: 36px;
+  height: 44px;
+  min-height: 44px;
   max-height: 120px;
   outline: none;
   transition: all 0.2s;
@@ -446,7 +464,7 @@ onMounted(() => {
   -ms-overflow-style: none;
   background: transparent;
   color: rgba(255, 255, 255, 0.9);
-  line-height: 36px;
+  line-height: 44px;
   box-sizing: border-box;
 }
 
@@ -456,6 +474,9 @@ onMounted(() => {
 
 .input-box::placeholder {
   color: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+  font-size: 16px;
+  font-family: "等线", "DengXian", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .input-box:focus {
@@ -467,8 +488,8 @@ onMounted(() => {
 }
 
 .send-button {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(203, 166, 89, 0.9);
   color: #0a1628;
@@ -482,7 +503,7 @@ onMounted(() => {
 }
 
 .send-icon {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
 }
 
@@ -497,22 +518,61 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.stop-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 100, 100, 0.8);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.stop-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 2px;
+}
+
+.stop-button:hover {
+  background: rgba(255, 100, 100, 0.8);
+}
+
 .typing-indicator {
-  display: inline-block;
-  animation: blink 0.8s ease-in-out infinite;
-  margin-left: 2px;
-  color: rgba(203, 166, 89, 0.8);
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+.breathing-dot {
+  width: 10px;
+  height: 10px;
+  background: rgba(203, 166, 89, 0.9);
+  border-radius: 50%;
+  animation: breathing 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(203, 166, 89, 0.5);
 }
 
-.input-box:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+@keyframes breathing {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+    box-shadow: 0 0 4px rgba(203, 166, 89, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(203, 166, 89, 0.6);
+  }
 }
+
 
 /* 响应式设计 */
 @media (max-width: 768px) {
@@ -542,15 +602,6 @@ onMounted(() => {
 
   .message-content {
     font-size: 13px;
-  }
-
-  .send-button {
-    width: 32px;
-    height: 32px;
-  }
-
-  .send-icon {
-    font-size: 16px;
   }
 
   .chat-messages {
