@@ -14,9 +14,9 @@
             <!-- 思考过程消息 -->
             <div v-if="msg.type === 'thinking'" class="thinking-content">
               <div class="thinking-header"
-                   :class="{ 'thinking-active': msg.isThinking }"
-                   @click="msg.expanded = !msg.expanded">
-                <span class="thinking-icon">{{ msg.expanded ? '▼' : '▶' }}</span>
+                   :class="{ 'thinking-active': msg.isThinking, 'no-steps': !msg.thinkingSteps || msg.thinkingSteps.length === 0 }"
+                   @click="msg.thinkingSteps && msg.thinkingSteps.length > 0 ? msg.expanded = !msg.expanded : null">
+                <span v-if="msg.thinkingSteps && msg.thinkingSteps.length > 0" class="thinking-icon">{{ msg.expanded ? '▼' : '▶' }}</span>
                 <span class="thinking-text">{{ msg.content }}</span>
               </div>
               <!-- 折叠状态下显示当前步骤 -->
@@ -25,7 +25,7 @@
                 <span class="current-step-content">{{ msg.currentStep }}</span>
               </div>
               <!-- 展开状态显示所有步骤 -->
-              <div v-if="msg.expanded" class="thinking-steps">
+              <div v-if="msg.expanded && msg.thinkingSteps && msg.thinkingSteps.length > 0" class="thinking-steps">
                 <div v-for="step in msg.thinkingSteps" :key="step.step" class="thinking-step">
                   <span class="step-number">Step {{ step.step }}:</span>
                   <span class="step-content">{{ step.content }}</span>
@@ -62,7 +62,7 @@
         <textarea
           v-model="inputMessage"
           @keydown.enter.prevent="sendMessage"
-          placeholder="请输入消息..."
+          :placeholder="placeholder"
           class="input-box"
           :disabled="connectionStatus === 'connecting'"
         ></textarea>
@@ -101,6 +101,10 @@ const props = defineProps({
   aiType: {
     type: String,
     default: 'default'  // 'love' 或 'super'
+  },
+  placeholder: {
+    type: String,
+    default: '请输入消息...'
   }
 })
 
@@ -595,6 +599,14 @@ onMounted(() => {
 
 .thinking-header:hover {
   background: rgba(255, 255, 255, 0.03);
+}
+
+.thinking-header.no-steps {
+  cursor: default;
+}
+
+.thinking-header.no-steps:hover {
+  background: transparent;
 }
 
 .thinking-active {

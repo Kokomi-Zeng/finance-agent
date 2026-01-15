@@ -2,16 +2,19 @@
   <div class="financial-agent-container">
     <!-- 左侧历史栏 -->
     <div class="sidebar-left" :class="{ collapsed: sidebarCollapsed }">
-      <div class="sidebar-header">
+      <div class="brand-row">
         <button class="menu-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '打开菜单' : '关闭菜单'">
           <span>☰</span>
         </button>
-        <button v-if="!sidebarCollapsed" class="new-chat-btn" @click="startNewConversation">
-          <span class="btn-icon">+</span>
-          <span class="btn-text">新对话</span>
-        </button>
+        <div v-if="!sidebarCollapsed" class="brand">
+          <span class="brand-icon">💰</span>
+          <span class="brand-text">AI理财智能体</span>
+        </div>
       </div>
       <div v-if="!sidebarCollapsed" class="history-list">
+        <div class="new-chat-item" @click="startNewConversation">
+          <span class="new-chat-text">+ 新对话</span>
+        </div>
         <div
           v-for="conv in conversations"
           :key="conv.id"
@@ -67,7 +70,6 @@
         <button class="mobile-menu-btn" @click="toggleSidebar">
           <span>☰</span>
         </button>
-        <h1 class="title">AI理财智能体</h1>
         <div class="back-button" @click="goBack">返回</div>
       </div>
 
@@ -77,6 +79,7 @@
             :messages="messages"
             :connection-status="connectionStatus"
             ai-type="agent"
+            placeholder="向AI理财智能体提问..."
             @send-message="sendMessage"
           />
         </div>
@@ -437,84 +440,64 @@ onBeforeUnmount(() => {
 }
 
 .sidebar-left.collapsed {
-  width: 56px;
+  width: 70px;
 }
 
-.sidebar-header {
+.brand-row {
+  position: relative;
   padding: 16px;
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
   flex-shrink: 0;
-  align-items: center;
-  min-height: 68px;
-}
-
-.sidebar-left.collapsed .sidebar-header {
-  justify-content: center;
-  padding: 16px 8px;
+  height: 70px;
+  box-sizing: border-box;
 }
 
 .menu-btn {
-  flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
   padding: 0;
   border: none;
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
   cursor: pointer;
   font-size: 18px;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .menu-btn:hover {
-  background: rgba(203, 166, 89, 0.08);
+  background: rgba(203, 166, 89, 0.12);
   color: rgba(203, 166, 89, 0.9);
 }
 
-.sidebar-left.collapsed .menu-btn {
-  width: 40px;
-  height: 40px;
-}
-
-.new-chat-btn {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  background: linear-gradient(135deg,
-    rgba(203, 166, 89, 0.12) 0%,
-    rgba(203, 166, 89, 0.06) 100%
-  );
-  color: rgba(203, 166, 89, 0.9);
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s;
+.brand {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   white-space: nowrap;
 }
 
-.btn-icon {
-  font-size: 16px;
-  font-weight: 400;
-  opacity: 0.8;
+.brand-icon {
+  font-size: 18px;
 }
 
-.new-chat-btn:hover {
-  background: linear-gradient(135deg,
-    rgba(203, 166, 89, 0.18) 0%,
-    rgba(203, 166, 89, 0.1) 100%
-  );
+.brand-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
 }
+
 
 .history-list {
   flex: 1;
@@ -529,6 +512,26 @@ onBeforeUnmount(() => {
 
 .history-list::-webkit-scrollbar {
   display: none;
+}
+
+.new-chat-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  background: rgba(203, 166, 89, 0.08);
+  text-align: center;
+}
+
+.new-chat-item:hover {
+  background: rgba(203, 166, 89, 0.15);
+}
+
+.new-chat-text {
+  font-size: 13px;
+  color: rgba(203, 166, 89, 0.9);
+  font-weight: 500;
 }
 
 .history-item {
@@ -650,14 +653,18 @@ onBeforeUnmount(() => {
 }
 
 .header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
   padding: 0 24px;
-  background: #0d1c30;
+  background: transparent;
   z-index: 50;
-  height: 60px;
+  height: 50px;
   flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
 }
 
 .back-button {
@@ -765,6 +772,10 @@ onBeforeUnmount(() => {
     z-index: 999;
   }
 
+  .edit-btn {
+    display: none;
+  }
+
   .mobile-menu-btn {
     visibility: visible;
     pointer-events: auto;
@@ -785,8 +796,6 @@ onBeforeUnmount(() => {
 
   .header {
     padding: 0 16px;
-    position: relative;
-    justify-content: center;
   }
 
   .title {
@@ -809,22 +818,10 @@ onBeforeUnmount(() => {
   }
 
   .header {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 0 12px;
   }
 
-  .header-spacer {
-    display: none;
-  }
-
   .back-button {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
     font-size: 12px;
     padding: 6px 12px;
   }

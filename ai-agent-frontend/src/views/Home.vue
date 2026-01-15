@@ -31,14 +31,14 @@
         <div class="data-card">
           <div class="data-label">知识库规模</div>
           <div class="data-value">
-            <span class="value-num">5+</span>
+            <span class="value-num">100+</span>
             <span class="value-unit">条目</span>
           </div>
         </div>
         <div class="data-card">
           <div class="data-label">模型响应速度</div>
           <div class="data-value">
-            <span class="value-num">&lt;20s</span>
+            <span class="value-num">&lt;1s</span>
             <span class="value-unit">平均</span>
           </div>
         </div>
