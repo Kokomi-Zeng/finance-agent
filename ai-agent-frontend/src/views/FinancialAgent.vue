@@ -7,7 +7,7 @@
           <span>☰</span>
         </button>
         <div v-if="!sidebarCollapsed" class="brand">
-          <span class="brand-icon">💰</span>
+          <span class="brand-icon">◈</span>
           <span class="brand-text">AI理财智能体</span>
         </div>
       </div>
@@ -512,7 +512,8 @@ onBeforeUnmount(() => {
 }
 
 .brand-icon {
-  font-size: 18px;
+  font-size: 28px;
+  color: rgba(203, 166, 89, 0.9);
 }
 
 .brand-text {
@@ -808,25 +809,30 @@ onBeforeUnmount(() => {
     visibility: visible;
     pointer-events: auto;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(255, 255, 255, 0.5);
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
     position: absolute;
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    transition: all 0.2s;
+    transition: background 0.2s, color 0.2s;
   }
 
   .mobile-menu-btn:hover {
-    background: rgba(203, 166, 89, 0.08);
+    background: rgba(203, 166, 89, 0.12);
     color: rgba(203, 166, 89, 0.9);
   }
+
 
   .header {
     padding: 0 16px;
     background: #0d1c30;
     position: relative;
     justify-content: center;
+    height: 60px;
   }
 
   .mobile-title {

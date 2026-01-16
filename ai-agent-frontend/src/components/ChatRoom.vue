@@ -52,7 +52,9 @@
             <div class="message-time">{{ formatTime(msg.time) }}</div>
           </div>
           <div class="avatar user-avatar">
-            <div class="avatar-placeholder">我</div>
+            <div class="avatar-placeholder">
+              <span class="user-icon"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -78,7 +80,7 @@
           class="send-button"
           :disabled="!inputMessage.trim()"
         >
-          <span class="send-icon">↑</span>
+          <span class="send-arrow"></span>
         </button>
       </div>
     </div>
@@ -275,9 +277,38 @@ onMounted(() => {
     rgba(203, 166, 89, 0.3) 0%,
     rgba(203, 166, 89, 0.15) 100%
   );
-  color: rgba(203, 166, 89, 0.9);
-  font-weight: 500;
-  font-size: 12px;
+}
+
+.user-icon {
+  position: relative;
+  width: 20px;
+  height: 22px;
+}
+
+/* 头部 */
+.user-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: rgba(203, 166, 89, 0.85);
+  border-radius: 50%;
+}
+
+/* 身体 */
+.user-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 10px;
+  background: rgba(203, 166, 89, 0.85);
+  border-radius: 9px 9px 0 0;
 }
 
 .message-bubble {
@@ -502,14 +533,49 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.send-icon {
-  font-size: 20px;
-  font-weight: bold;
+.send-arrow {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+/* 箭杆 - 竖线 */
+.send-arrow::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  transform: translateX(-50%);
+  width: 2.5px;
+  height: 16px;
+  background: #0a1628;
+  border-radius: 1px;
+}
+
+/* 箭头尖 - V形 */
+.send-arrow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  transform: translateX(-50%) rotate(45deg);
+  width: 9px;
+  height: 9px;
+  border-left: 2.5px solid #0a1628;
+  border-top: 2.5px solid #0a1628;
+}
+
+.send-button:disabled .send-arrow::before {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.send-button:disabled .send-arrow::after {
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .send-button:hover:not(:disabled) {
   background: rgba(203, 166, 89, 1);
-  transform: scale(1.05);
+  box-shadow: 0 0 0 4px rgba(203, 166, 89, 0.2);
 }
 
 .send-button:disabled {
