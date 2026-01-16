@@ -6,6 +6,8 @@
 
 RAG / ReAct Agent / SSE 流式对话 / Tool Calling / PgVector / 多轮记忆 / Spring AI
 
+直接体验网址：http://114.67.117.137/
+
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Vue](https://img.shields.io/badge/Vue-3.2.47-green.svg)](https://vuejs.org/)
@@ -13,12 +15,6 @@ RAG / ReAct Agent / SSE 流式对话 / Tool Calling / PgVector / 多轮记忆 / 
 ![example3](./example3.svg)
 
 </div>
-
----
-
-## 在线体验
-
-想直接体验？Please contact the author: 2845728164@qq.com to get the demo website link.
 
 ---
 
